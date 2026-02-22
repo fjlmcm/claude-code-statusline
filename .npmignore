@@ -1,0 +1,6 @@
+tests/
+coverage/
+.github/
+CONTRIBUTING.md
+CHANGELOG.md
+.gitignore

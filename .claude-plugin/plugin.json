@@ -1,0 +1,9 @@
+{
+  "name": "claude-code-statusline",
+  "version": "1.1.8",
+  "description": "Statusline with real 5h/7d remaining quota display",
+  "author": { "name": "MT" },
+  "repository": "https://github.com/fjlmcm/claude-code-statusline",
+  "license": "MIT",
+  "keywords": ["statusline", "quota", "usage"]
+}

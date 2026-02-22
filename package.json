@@ -1,0 +1,49 @@
+{
+  "name": "@fjlmcm/claude-code-statusline",
+  "version": "1.1.8",
+  "description": "A Claude Code statusline that shows your real remaining quota",
+  "main": "scripts/statusline.js",
+  "bin": {
+    "ccsl-install": "ccsl-install.js",
+    "ccsl-uninstall": "ccsl-uninstall.js"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "files": [
+    ".claude-plugin/",
+    "hooks/",
+    "scripts/",
+    "ccsl-install.js",
+    "ccsl-uninstall.js",
+    "config.example.json",
+    "img/",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "statusline",
+    "quota",
+    "rate-limit",
+    "cli",
+    "plugin",
+    "terminal",
+    "anthropic"
+  ],
+  "author": {
+    "name": "MT"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fjlmcm/claude-code-statusline.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

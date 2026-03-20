@@ -19,7 +19,6 @@ const RED = '\x1b[31m';
 const MAGENTA = '\x1b[35m';
 
 const NBSP = '\u00A0';
-const AUTOCOMPACT_BUFFER = 0.225;
 
 // Paths
 const CLAUDE_DIR = path.join(os.homedir(), '.claude');
@@ -117,7 +116,7 @@ function hasOAuthCredentials() {
 
 module.exports = {
   RESET, BOLD, DIM, CYAN, GREEN, YELLOW, RED, MAGENTA,
-  NBSP, AUTOCOMPACT_BUFFER,
+  NBSP,
   CLAUDE_DIR, CACHE_FILE, CREDS_FILE, CONFIG_FILE,
   readJSON, readCredentials, loadConfig, detectPlan, hasOAuthCredentials,
 };

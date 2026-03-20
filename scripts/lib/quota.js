@@ -41,20 +41,20 @@ function refreshCache() {
         } catch (e) { debugLog(e); }
       });
     });
+    req.on('timeout', () => { debugLog('refreshCache: request timeout'); req.destroy(); });
     req.on('error', (e) => { debugLog(e); });
   } catch (e) { debugLog(e); }
 }
 
 function getUsageData(cacheTtl, entryPoint) {
   let cachedData = null;
-  let cacheStale = true;
+  let cacheAge = Infinity;
   try {
     const stat = fs.statSync(CACHE_FILE);
-    const age = (Date.now() - stat.mtimeMs) / 1000;
+    cacheAge = (Date.now() - stat.mtimeMs) / 1000;
     cachedData = readJSON(CACHE_FILE);
-    cacheStale = age >= cacheTtl;
   } catch (e) { debugLog(e); }
-  if (cacheStale) {
+  if (cacheAge >= cacheTtl) {
     try {
       const child = spawn(process.execPath, [entryPoint, '--refresh-cache'], {
         stdio: 'ignore', detached: true, windowsHide: true,
@@ -62,7 +62,20 @@ function getUsageData(cacheTtl, entryPoint) {
       child.unref();
     } catch (e) { debugLog(e); }
   }
-  return cachedData;
+  if (!cachedData) return null;
+  // Mark stale if cache is very old or any reset time has passed
+  let stale = cacheAge > 3 * cacheTtl;
+  if (!stale) {
+    const now = Date.now();
+    for (const key of ['five_hour', 'seven_day']) {
+      const bucket = cachedData[key];
+      if (bucket && bucket.resets_at && new Date(bucket.resets_at).getTime() < now) {
+        stale = true;
+        break;
+      }
+    }
+  }
+  return { data: cachedData, stale };
 }
 
 module.exports = { refreshCache, getUsageData };

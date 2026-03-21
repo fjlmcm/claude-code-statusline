@@ -28,11 +28,9 @@ if (process.argv[2] === '--refresh-cache') {
   const ctxPercent = getContextPercent(data.context_window || {});
   const gitInfo = getGitInfo(currentDir);
   const plan = detectPlan(config, modelId);
-  const usageResult = hasOAuthCredentials() ? getUsageData(config.cache_ttl, __filename) : null;
-  const usageData = usageResult ? usageResult.data : null;
-  const usageStale = usageResult ? usageResult.stale : false;
+  const usageData = hasOAuthCredentials() ? getUsageData(config.cache_ttl, __filename) : null;
 
-  const state = { data, config, S, model, plan, currentDir, gitInfo, costData, ctxPercent, usageData, usageStale };
+  const state = { data, config, S, model, plan, currentDir, gitInfo, costData, ctxPercent, usageData };
 
   if (config.layout === 'compact') {
     renderCompact({ ...state, tx: parseTranscript(data.transcript_path || '') });

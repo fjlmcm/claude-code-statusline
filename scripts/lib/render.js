@@ -26,19 +26,14 @@ function abbreviatePath(p) {
   return norm;
 }
 
-function renderQuotaSegments(usageData, S, config, verbose, stale) {
+function renderQuotaSegments(usageData, S, config, verbose) {
   const parts = [];
   for (const [field, label] of [['five_hour', 'quota_5h'], ['seven_day', 'quota_7d']]) {
     const bucket = usageData[field];
     if (!bucket || bucket.utilization == null) continue;
     const used = Math.round(bucket.utilization);
     const remaining = 100 - used;
-    let seg;
-    if (stale) {
-      seg = `${DIM}${S[label]}:${remaining}%?${RESET}`;
-    } else {
-      seg = `${usedColor(used)}${S[label]}:${remaining}%${RESET}`;
-    }
+    let seg = `${usedColor(used)}${S[label]}:${remaining}%${RESET}`;
     if (verbose) {
       const rt = formatResetTime(bucket.resets_at, config.lang);
       if (rt) seg += ` ${DIM}${fill(S.reset_wrap, { time: rt })}${RESET}`;
@@ -51,20 +46,20 @@ function renderQuotaSegments(usageData, S, config, verbose, stale) {
       if (md && md.utilization != null) {
         const used = Math.round(md.utilization);
         const remaining = 100 - used;
-        if (used > 0) parts.push(`${stale ? DIM : usedColor(used)}${label}:${remaining}%${stale ? '?' : ''}${RESET}`);
+        if (used > 0) parts.push(`${usedColor(used)}${label}:${remaining}%${RESET}`);
       }
     }
     const extra = usageData.extra_usage;
     if (extra && extra.is_enabled && extra.utilization != null) {
       const used = Math.round(extra.utilization);
       const remaining = 100 - used;
-      parts.push(`${stale ? DIM : usedColor(used)}${S.quota_extra}:${remaining}%${stale ? '?' : ''}${RESET}`);
+      parts.push(`${usedColor(used)}${S.quota_extra}:${remaining}%${RESET}`);
     }
   }
   return parts;
 }
 
-function renderExpanded({ data, config, S, model, plan, currentDir, gitInfo, costData, ctxPercent, usageData, usageStale }) {
+function renderExpanded({ data, config, S, model, plan, currentDir, gitInfo, costData, ctxPercent, usageData }) {
   // Line 1: [Model] Plan ~/path session:Nm lines:+N/-N
   const l1 = [];
   l1.push(`${BOLD}${CYAN}[${model}]${RESET}`);
@@ -100,14 +95,14 @@ function renderExpanded({ data, config, S, model, plan, currentDir, gitInfo, cos
 
   if (usageData) {
     l2.push(`${DIM}|${RESET}`);
-    l2.push(...renderQuotaSegments(usageData, S, config, true, usageStale));
+    l2.push(...renderQuotaSegments(usageData, S, config, true));
   }
 
   emitLine(l1.join(''));
   emitLine(l2.join(' '));
 }
 
-function renderCompact({ data, config, S, model, plan, currentDir, gitInfo, costData, ctxPercent, usageData, usageStale, tx }) {
+function renderCompact({ data, config, S, model, plan, currentDir, gitInfo, costData, ctxPercent, usageData, tx }) {
   const p = [];
   p.push(`${BOLD}${CYAN}[${model}]${RESET}`);
   if (plan) p.push(`${BOLD}${MAGENTA}${plan}${RESET}`);
@@ -133,7 +128,7 @@ function renderCompact({ data, config, S, model, plan, currentDir, gitInfo, cost
 
   if (usageData) {
     p.push(`${DIM}|${RESET}`);
-    p.push(...renderQuotaSegments(usageData, S, config, false, usageStale));
+    p.push(...renderQuotaSegments(usageData, S, config, false));
   }
 
   emitLine(p.join(' '));

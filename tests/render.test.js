@@ -46,13 +46,13 @@ describe('renderQuotaSegments', () => {
   const config = { lang: 'en' };
 
   test('returns empty array for empty usage data', () => {
-    const parts = renderQuotaSegments({}, S, config, false, false);
+    const parts = renderQuotaSegments({}, S, config, false);
     expect(parts).toEqual([]);
   });
 
   test('renders 5h bucket as remaining', () => {
     const data = { five_hour: { utilization: 25 } };
-    const parts = renderQuotaSegments(data, S, config, false, false);
+    const parts = renderQuotaSegments(data, S, config, false);
     expect(parts.length).toBe(1);
     expect(parts[0]).toContain('75%');
   });
@@ -62,7 +62,7 @@ describe('renderQuotaSegments', () => {
       five_hour: { utilization: 25 },
       seven_day: { utilization: 50 },
     };
-    const parts = renderQuotaSegments(data, S, config, false, false);
+    const parts = renderQuotaSegments(data, S, config, false);
     expect(parts.length).toBe(2);
   });
 
@@ -70,18 +70,9 @@ describe('renderQuotaSegments', () => {
     const today = new Date();
     today.setHours(15, 0, 0, 0);
     const data = { five_hour: { utilization: 25, resets_at: today.toISOString() } };
-    const parts = renderQuotaSegments(data, S, config, true, false);
+    const parts = renderQuotaSegments(data, S, config, true);
     expect(parts.length).toBe(1);
     expect(parts[0]).toContain('reset');
-  });
-
-  test('stale data shows dimmed with ?', () => {
-    const data = { five_hour: { utilization: 25 } };
-    const parts = renderQuotaSegments(data, S, config, false, true);
-    expect(parts.length).toBe(1);
-    expect(parts[0]).toContain(DIM);
-    expect(parts[0]).toContain('75%?');
-    expect(parts[0]).not.toContain(GREEN);
   });
 
   test('extra_usage shown in verbose mode when enabled', () => {
@@ -89,7 +80,7 @@ describe('renderQuotaSegments', () => {
       five_hour: { utilization: 10 },
       extra_usage: { is_enabled: true, utilization: 40 },
     };
-    const parts = renderQuotaSegments(data, S, config, true, false);
+    const parts = renderQuotaSegments(data, S, config, true);
     expect(parts.some(p => p.includes('extra') && p.includes('60%'))).toBe(true);
   });
 
@@ -98,7 +89,7 @@ describe('renderQuotaSegments', () => {
       five_hour: { utilization: 10 },
       extra_usage: { is_enabled: false, utilization: null },
     };
-    const parts = renderQuotaSegments(data, S, config, true, false);
+    const parts = renderQuotaSegments(data, S, config, true);
     expect(parts.some(p => p.includes('extra'))).toBe(false);
   });
 });

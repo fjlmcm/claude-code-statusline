@@ -26,34 +26,59 @@ function abbreviatePath(p) {
   return norm;
 }
 
+function remainingPart(used, label) {
+  return `${usedColor(used)}${label} ${100 - used}%${RESET}`;
+}
+
 function renderQuotaSegments(usageData, S, config, verbose) {
   const parts = [];
-  for (const [field, label] of [['five_hour', 'quota_5h'], ['seven_day', 'quota_7d']]) {
-    const bucket = usageData[field];
-    if (!bucket || bucket.utilization == null) continue;
-    const used = Math.round(bucket.utilization);
-    const remaining = 100 - used;
-    let seg = `${usedColor(used)}${S[label]}:${remaining}%${RESET}`;
+
+  // 5h quota — always simple
+  const fiveH = usageData.five_hour;
+  if (fiveH && fiveH.utilization != null) {
+    const used = Math.round(fiveH.utilization);
+    let seg = `${usedColor(used)}${S.quota_5h}:${100 - used}%${RESET}`;
     if (verbose) {
-      const rt = formatResetTime(bucket.resets_at, config.lang);
+      const rt = formatResetTime(fiveH.resets_at, config.lang);
       if (rt) seg += ` ${DIM}${fill(S.reset_wrap, { time: rt })}${RESET}`;
     }
     parts.push(seg);
   }
-  if (verbose) {
-    for (const [key, label] of [['seven_day_opus', 'opus'], ['seven_day_sonnet', 'sonnet']]) {
-      const md = usageData[key];
-      if (md && md.utilization != null) {
-        const used = Math.round(md.utilization);
-        const remaining = 100 - used;
-        if (used > 0) parts.push(`${usedColor(used)}${label}:${remaining}%${RESET}`);
+
+  // 7d quota — inline per-model breakdown when available
+  const sevenD = usageData.seven_day;
+  if (sevenD && sevenD.utilization != null) {
+    const opus = usageData.seven_day_opus;
+    const sonnet = usageData.seven_day_sonnet;
+    const hasModelBreakdown = verbose && (opus || sonnet);
+
+    let seg = `${S.quota_7d}:`;
+    if (hasModelBreakdown) {
+      const modelParts = [];
+      // opus: use seven_day_opus if available, otherwise use overall as opus
+      const opusUsed = Math.round((opus && opus.utilization != null) ? opus.utilization : sevenD.utilization);
+      modelParts.push(remainingPart(opusUsed, 'opus'));
+      if (sonnet && sonnet.utilization != null) {
+        modelParts.push(remainingPart(Math.round(sonnet.utilization), 'sonnet'));
       }
+      seg += modelParts.join(' ');
+    } else {
+      const used = Math.round(sevenD.utilization);
+      seg = `${usedColor(used)}${S.quota_7d}:${100 - used}%${RESET}`;
     }
+    if (verbose) {
+      const rt = formatResetTime(sevenD.resets_at, config.lang);
+      if (rt) seg += ` ${DIM}${fill(S.reset_wrap, { time: rt })}${RESET}`;
+    }
+    parts.push(seg);
+  }
+
+  // extra_usage
+  if (verbose) {
     const extra = usageData.extra_usage;
     if (extra && extra.is_enabled && extra.utilization != null) {
       const used = Math.round(extra.utilization);
-      const remaining = 100 - used;
-      parts.push(`${usedColor(used)}${S.quota_extra}:${remaining}%${RESET}`);
+      parts.push(`${usedColor(used)}${S.quota_extra}:${100 - used}%${RESET}`);
     }
   }
   return parts;

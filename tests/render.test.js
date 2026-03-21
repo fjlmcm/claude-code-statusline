@@ -50,11 +50,11 @@ describe('renderQuotaSegments', () => {
     expect(parts).toEqual([]);
   });
 
-  test('renders 5h bucket', () => {
+  test('renders 5h bucket as remaining', () => {
     const data = { five_hour: { utilization: 25 } };
     const parts = renderQuotaSegments(data, S, config, false, false);
     expect(parts.length).toBe(1);
-    expect(parts[0]).toContain('25%');
+    expect(parts[0]).toContain('75%');
   });
 
   test('renders both buckets', () => {
@@ -80,7 +80,7 @@ describe('renderQuotaSegments', () => {
     const parts = renderQuotaSegments(data, S, config, false, true);
     expect(parts.length).toBe(1);
     expect(parts[0]).toContain(DIM);
-    expect(parts[0]).toContain('25%?');
+    expect(parts[0]).toContain('75%?');
     expect(parts[0]).not.toContain(GREEN);
   });
 
@@ -90,7 +90,7 @@ describe('renderQuotaSegments', () => {
       extra_usage: { is_enabled: true, utilization: 40 },
     };
     const parts = renderQuotaSegments(data, S, config, true, false);
-    expect(parts.some(p => p.includes('extra') && p.includes('40%'))).toBe(true);
+    expect(parts.some(p => p.includes('extra') && p.includes('60%'))).toBe(true);
   });
 
   test('extra_usage hidden when not enabled', () => {

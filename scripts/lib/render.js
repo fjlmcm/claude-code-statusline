@@ -32,11 +32,12 @@ function renderQuotaSegments(usageData, S, config, verbose, stale) {
     const bucket = usageData[field];
     if (!bucket || bucket.utilization == null) continue;
     const used = Math.round(bucket.utilization);
+    const remaining = 100 - used;
     let seg;
     if (stale) {
-      seg = `${DIM}${S[label]}:${used}%?${RESET}`;
+      seg = `${DIM}${S[label]}:${remaining}%?${RESET}`;
     } else {
-      seg = `${usedColor(used)}${S[label]}:${used}%${RESET}`;
+      seg = `${usedColor(used)}${S[label]}:${remaining}%${RESET}`;
     }
     if (verbose) {
       const rt = formatResetTime(bucket.resets_at, config.lang);
@@ -49,13 +50,15 @@ function renderQuotaSegments(usageData, S, config, verbose, stale) {
       const md = usageData[key];
       if (md && md.utilization != null) {
         const used = Math.round(md.utilization);
-        if (used > 0) parts.push(`${stale ? DIM : usedColor(used)}${label}:${used}%${stale ? '?' : ''}${RESET}`);
+        const remaining = 100 - used;
+        if (used > 0) parts.push(`${stale ? DIM : usedColor(used)}${label}:${remaining}%${stale ? '?' : ''}${RESET}`);
       }
     }
     const extra = usageData.extra_usage;
     if (extra && extra.is_enabled && extra.utilization != null) {
       const used = Math.round(extra.utilization);
-      parts.push(`${stale ? DIM : usedColor(used)}${S.quota_extra}:${used}%${stale ? '?' : ''}${RESET}`);
+      const remaining = 100 - used;
+      parts.push(`${stale ? DIM : usedColor(used)}${S.quota_extra}:${remaining}%${stale ? '?' : ''}${RESET}`);
     }
   }
   return parts;

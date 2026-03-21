@@ -63,19 +63,7 @@ function getUsageData(cacheTtl, entryPoint) {
     } catch (e) { debugLog(e); }
   }
   if (!cachedData) return null;
-  // Mark stale if cache is very old or any reset time has passed
-  let stale = cacheAge > 3 * cacheTtl;
-  if (!stale) {
-    const now = Date.now();
-    for (const key of ['five_hour', 'seven_day']) {
-      const bucket = cachedData[key];
-      if (bucket && bucket.resets_at && new Date(bucket.resets_at).getTime() < now) {
-        stale = true;
-        break;
-      }
-    }
-  }
-  return { data: cachedData, stale };
+  return { data: cachedData, stale: cacheAge > 3 * cacheTtl };
 }
 
 module.exports = { refreshCache, getUsageData };

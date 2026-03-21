@@ -30,19 +30,23 @@ function remainingPart(used, label) {
   return `${usedColor(used)}${label} ${100 - used}%${RESET}`;
 }
 
+function quotaLabel(S, fallback, resets_at, lang, verbose) {
+  if (verbose) {
+    const rt = formatResetTime(resets_at, lang);
+    if (rt) return fill(S.quota_before, { time: rt });
+  }
+  return fallback;
+}
+
 function renderQuotaSegments(usageData, S, config, verbose) {
   const parts = [];
 
-  // 5h quota — always simple
+  // 5h quota
   const fiveH = usageData.five_hour;
   if (fiveH && fiveH.utilization != null) {
     const used = Math.round(fiveH.utilization);
-    let seg = `${usedColor(used)}${S.quota_5h}:${100 - used}%${RESET}`;
-    if (verbose) {
-      const rt = formatResetTime(fiveH.resets_at, config.lang);
-      if (rt) seg += ` ${DIM}${fill(S.reset_wrap, { time: rt })}${RESET}`;
-    }
-    parts.push(seg);
+    const label = quotaLabel(S, S.quota_5h, fiveH.resets_at, config.lang, verbose);
+    parts.push(`${usedColor(used)}${label}:${100 - used}%${RESET}`);
   }
 
   // 7d quota — inline per-model breakdown when available
@@ -51,8 +55,9 @@ function renderQuotaSegments(usageData, S, config, verbose) {
     const opus = usageData.seven_day_opus;
     const sonnet = usageData.seven_day_sonnet;
     const hasModelBreakdown = verbose && (opus || sonnet);
+    const label = quotaLabel(S, S.quota_7d, sevenD.resets_at, config.lang, verbose);
 
-    let seg = `${S.quota_7d}:`;
+    let seg;
     if (hasModelBreakdown) {
       const modelParts = [];
       // opus: use seven_day_opus if available, otherwise use overall as opus
@@ -61,14 +66,10 @@ function renderQuotaSegments(usageData, S, config, verbose) {
       if (sonnet && sonnet.utilization != null) {
         modelParts.push(remainingPart(Math.round(sonnet.utilization), 'sonnet'));
       }
-      seg += modelParts.join(' ');
+      seg = `${label}:` + modelParts.join(' ');
     } else {
       const used = Math.round(sevenD.utilization);
-      seg = `${usedColor(used)}${S.quota_7d}:${100 - used}%${RESET}`;
-    }
-    if (verbose) {
-      const rt = formatResetTime(sevenD.resets_at, config.lang);
-      if (rt) seg += ` ${DIM}${fill(S.reset_wrap, { time: rt })}${RESET}`;
+      seg = `${usedColor(used)}${label}:${100 - used}%${RESET}`;
     }
     parts.push(seg);
   }

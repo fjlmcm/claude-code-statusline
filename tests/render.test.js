@@ -66,16 +66,26 @@ describe('renderQuotaSegments', () => {
     expect(parts.length).toBe(2);
   });
 
-  test('verbose mode adds reset time', () => {
+  test('verbose mode uses reset time as label', () => {
     const today = new Date();
     today.setHours(15, 0, 0, 0);
     const data = { five_hour: { utilization: 25, resets_at: today.toISOString() } };
     const parts = renderQuotaSegments(data, S, config, true);
     expect(parts.length).toBe(1);
-    expect(parts[0]).toContain('reset');
+    expect(parts[0]).toContain('by');
+    expect(parts[0]).toContain('75%');
+    // should NOT contain the fallback label
+    expect(parts[0]).not.toContain('5h left');
   });
 
-  test('7d verbose inlines per-model breakdown', () => {
+  test('verbose mode falls back to fixed label without resets_at', () => {
+    const data = { five_hour: { utilization: 25 } };
+    const parts = renderQuotaSegments(data, S, config, true);
+    expect(parts.length).toBe(1);
+    expect(parts[0]).toContain('5h left');
+  });
+
+  test('7d verbose inlines per-model breakdown with reset time label', () => {
     const data = {
       seven_day: { utilization: 20, resets_at: '2099-03-15T10:00:00Z' },
       seven_day_sonnet: { utilization: 80 },
@@ -85,7 +95,8 @@ describe('renderQuotaSegments', () => {
     // opus uses overall since seven_day_opus is absent
     expect(parts[0]).toContain('opus 80%');
     expect(parts[0]).toContain('sonnet 20%');
-    expect(parts[0]).toContain('reset');
+    expect(parts[0]).toContain('by');
+    expect(parts[0]).toContain('Mar');
   });
 
   test('7d compact shows overall only', () => {

@@ -46,6 +46,8 @@ function refreshCache() {
   } catch (e) { debugLog(e); }
 }
 
+const LOCK_FILE = CACHE_FILE + '.lock';
+
 function getUsageData(cacheTtl, entryPoint) {
   let cachedData = null;
   let cacheAge = Infinity;
@@ -55,12 +57,21 @@ function getUsageData(cacheTtl, entryPoint) {
     cachedData = readJSON(CACHE_FILE);
   } catch (e) { debugLog(e); }
   if (cacheAge >= cacheTtl) {
+    // Skip if another refresh is already in progress (lock < cacheTtl old)
+    let locked = false;
     try {
-      const child = spawn(process.execPath, [entryPoint, '--refresh-cache'], {
-        stdio: 'ignore', detached: true, windowsHide: true,
-      });
-      child.unref();
-    } catch (e) { debugLog(e); }
+      const lockAge = (Date.now() - fs.statSync(LOCK_FILE).mtimeMs) / 1000;
+      locked = lockAge < cacheTtl;
+    } catch {}
+    if (!locked) {
+      try {
+        fs.writeFileSync(LOCK_FILE, String(Date.now()));
+        const child = spawn(process.execPath, [entryPoint, '--refresh-cache'], {
+          stdio: 'ignore', detached: true, windowsHide: true,
+        });
+        child.unref();
+      } catch (e) { debugLog(e); }
+    }
   }
   return cachedData;
 }

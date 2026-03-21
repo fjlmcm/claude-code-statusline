@@ -60,16 +60,16 @@ function readCredentials() {
 }
 
 function loadConfig() {
-  const config = { layout: 'expanded', cache_ttl: 60, lang: detectLang(), plan: '' };
+  const config = { layout: 'expanded', cache_ttl: 120, lang: detectLang(), plan: '' };
   const fc = readJSON(CONFIG_FILE);
   if (fc) {
     if (fc.layout) config.layout = fc.layout;
     if (fc.lang) config.lang = fc.lang;
     if (fc.plan) config.plan = fc.plan;
-    if (fc.cache_ttl != null) config.cache_ttl = Number(fc.cache_ttl) || 60;
+    if (fc.cache_ttl != null) config.cache_ttl = Number(fc.cache_ttl) || 120;
   }
   if (process.env.CCSL_LAYOUT) config.layout = process.env.CCSL_LAYOUT;
-  if (process.env.CCSL_CACHE_TTL) config.cache_ttl = Number(process.env.CCSL_CACHE_TTL) || 60;
+  if (process.env.CCSL_CACHE_TTL) config.cache_ttl = Number(process.env.CCSL_CACHE_TTL) || 120;
   if (process.env.CCSL_LANG) config.lang = process.env.CCSL_LANG.slice(0, 2).toLowerCase();
   if (process.env.CCSL_PLAN) config.plan = process.env.CCSL_PLAN;
 

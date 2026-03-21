@@ -63,7 +63,7 @@ function getUsageData(cacheTtl, entryPoint) {
     } catch (e) { debugLog(e); }
   }
   if (!cachedData) return null;
-  return { data: cachedData, stale: cacheAge > 3 * cacheTtl };
+  return { data: cachedData, stale: cacheAge > 600 };
 }
 
 module.exports = { refreshCache, getUsageData };

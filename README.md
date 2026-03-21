@@ -130,13 +130,6 @@ claude plugin install https://github.com/fjlmcm/claude-code-statusline
 
 Done. The statusline appears automatically on next session.
 
-### npm install
-
-```bash
-npm install -g @fjlmcm/claude-code-statusline
-ccsl-install   # configure statusline in Claude Code
-```
-
 ### Manual install
 
 ```bash
@@ -257,13 +250,6 @@ claude plugin install https://github.com/fjlmcm/claude-code-statusline
 ```
 
 装完就行，下次启动自动生效。
-
-### npm 安装
-
-```bash
-npm install -g @fjlmcm/claude-code-statusline
-ccsl-install
-```
 
 ### 手动安装
 
